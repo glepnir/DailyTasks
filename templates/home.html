@@ -1,0 +1,120 @@
+{{template "_head.html" .}}
+
+<!--end mainHeader -->
+<button class=" btn-danger btn glyphicon glyphicon-plus floating-action-icon floating-action-icon-add"></button>
+
+<!-- Add note modal -->
+<div class="modal fade " id="addNoteModal" tabindex="-1" role="dialog" aria-labelledby="newNoteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="newNoteLabel"><span class="glyphicon glyphicon-pencil"></span>  New Task</h4>
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data" action="/add/" method="POST">
+                    <div class="form-group">
+
+                        <input type="text" name="title" class="form-control" id="add-note-title" placeholder="Title" />
+                        <input class="hidden" name="CSRFToken" value="{{.CSRFToken}}" />
+                    </div>
+                    <div class="form-group">
+
+                        <textarea class="form-control" name="content" id="add-note-content" placeholder="Content" rows="10" ></textarea>
+                        <a id="toggleAddFileGrp">Add File</a>
+                        <span id="file-group" class="hidden">
+                            File: <input type="file" name="uploadfile" />
+                        </span>
+                         <!--Date: <input id="datepicker" name="dueDate"/>-->
+                        <br> Priority:
+                        <input type="radio" name="priority" value="3" /> High
+                        <input type="radio" name="priority" value="2" /> Medium
+                        <input type="radio" name="priority" value="1" /> Low
+                        <br>
+                        <input type="checkbox" name="hide" id="hideChk"> Hide from timeline
+                    </div>
+                    Category:
+                    <select name="category" class="dropdown">
+                        <option>---</option>
+                        {{$navigation := .Navigation}} {{$categories := .Categories}} {{range $cat := $categories}}
+                        <option value="{{$cat.Name}}" {{if eq $cat.Name $navigation }} selected="true" {{end}}> {{$cat.Name}} </option>
+                        {{end}}
+                    </select>
+                   
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                <input type="submit" value="Submit" class="btn btn-primary" id="addNoteBtn" />
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="timeline">
+    {{ if .Tasks}} {{range $key, $value := .Tasks}}
+    <div class="note" id="{{$value.Id}}">
+        <p class="noteHeading ">{{ $value.Title}}
+            {{if $value.IsOverdue}}<span class="overdue">Overdue</span>{{end}}
+        </p> <span class="toggle glyphicon glyphicon-resize-full"></span>
+
+        <span class="noteContent">
+            {{$value.ContentHTML}}
+            {{$value.CompletedMsg}}
+                 <div class="commentslist">
+                    {{range $value.Comments}}
+                    <div class="comment">
+                        <span>{{.Content}}</span>
+                        <span class="timestamp">{{.Username}} {{.Created}}</span>
+                        <a href="/del-comment/{{.ID}}"><span class="glyphicon glyphicon-trash timestamp"></span></a>
+                    </div> 
+                    {{end}}
+                    
+                    <div class="comment">
+                        <form method="POST" action="/add-comment/">
+                        <textarea rows="2" cols="75" name="commentText" placeholder="Add Comment"></textarea>
+                        <input type="text" class="hidden" name="taskID" value="{{$value.Id}}">
+                        <input type="submit" value="Comment" class="btn btn-primary" />
+                        </form> 
+                    </div>
+                 </div>
+        </span>
+
+        <span class="notefooter">
+        <ul class="menu">
+          <li role="presentation">Priority: {{$value.Priority}}</li>
+          <!-- <li role="presentation">
+              <span class="glyphicon glyphicon-time"></span> {{$value.Created}}</li> -->
+        <li role="presentation">
+            <a role="menuitem" tabindex="-1" href="/trash/{{.Id}}">
+                <span class="glyphicon glyphicon-trash"></span></a>
+        </li>
+        <li role="presentation">
+            <a role="menuitem" tabindex="-1" href="/complete/{{.Id}}">
+                <span class="glyphicon glyphicon-check"></span></a>
+        </li>
+        <li role="presentation">
+            <a role="menuitem" tabindex="-1" href="/edit/{{.Id}}">
+                <span class="glyphicon glyphicon-pencil"></span></a>
+        </li>
+        <li role="presentation">
+              <a href="/category/{{$value.Category}}"> {{$value.Category}}</a>
+          </li>
+        </ul>
+        </span>
+    </div>
+    {{end}} {{else}}
+    <div class="note">
+        <p class="noteHeading">No Tasks here</p>
+        <p class="notefooter">Create new task
+            <button class="floating-action-icon-add" >
+                here </button>
+        </p>
+    </div>
+    {{end}}
+</div>
+{{template "_footer.html" .}}
+
+</body>
+
+</html>

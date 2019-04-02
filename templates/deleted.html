@@ -1,0 +1,46 @@
+{{template "_head.html" .}}
+<!--end mainHeader -->
+{{if .}}
+<a href="/delete/all">
+    <button class="btn-danger btn glyphicon glyphicon-trash floating-action-icon"></button>
+</a>
+{{end}}
+
+<div class="timeline">
+    {{ if .Tasks}} {{range $key, $value := .Tasks}}
+    <div class="note">
+        <p class="noteHeading">{{$value.Title}}</p> <span class="toggle glyphicon glyphicon-resize-full"></span>
+        <span class="noteContent">{{$value.Content}}</span>
+        <span class="notefooter">
+      <ul class="menu">
+        <li role="presentation"> <a role="menuitem" tabindex="-1" href="/delete/{{.Id}}">
+                <span class="glyphicon glyphicon-trash"></span></a>
+        </li>
+        <li role="presentation">
+            <a role="menuitem" tabindex="-1" href="/restore/{{.Id}}">
+                <span class="glyphicon glyphicon-inbox"></span></a>
+        </li>
+        
+        <li role="presentation">Priority: {{$value.Priority}}</li>
+        
+          <li role="presentation">
+              <span class="glyphicon glyphicon-time"></span> {{$value.Created}}</li>
+        <li role="presentation">
+              <a href="/category/{{$value.Category}}"> {{$value.Category}}</a>
+          </li>
+        
+        </ul>
+        </span>
+    </div>
+    {{end}} {{else}}
+    <div class="note">
+        <p class="noteHeading">No Tasks here</p>
+        <p class="notefooter">Go to home page <a href="/">here</a> </p>
+    </div>
+    {{end}}
+</div>
+{{template "_footer.html"}}
+
+</body>
+
+</html>
