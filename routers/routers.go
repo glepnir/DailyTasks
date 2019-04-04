@@ -9,6 +9,7 @@ import (
 
 //InitRouter bind url with handler
 func InitRouter() {
-	http.HandleFunc("/login", GetLogin)
+	http.HandleFunc("/login/", LoginFunc)
+	http.HandleFunc("/signup/", SignUpFunc)
 	http.Handle("/static/", http.FileServer(http.Dir("public")))
 }

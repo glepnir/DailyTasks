@@ -5,6 +5,8 @@ package database
 import (
 	"database/sql"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var database Database
@@ -15,7 +17,7 @@ type Database struct {
 	db *sql.DB
 }
 
-//Encapsulation the database/sql begin()
+//Begin() will provide tx
 func (d Database) begin() (tx *sql.Tx) {
 	tx, err := d.db.Begin()
 	if err != nil {
@@ -25,7 +27,7 @@ func (d Database) begin() (tx *sql.Tx) {
 	return tx
 }
 
-//Encapsulation datbase/sql Prepare()
+// Prepare() Encapsulation datbase/sql
 func (d Database) prepare(q string) (stmt *sql.Stmt) {
 	stmt, err := d.db.Prepare(q)
 	if err != nil {
@@ -35,7 +37,7 @@ func (d Database) prepare(q string) (stmt *sql.Stmt) {
 	return stmt
 }
 
-//Encapsulation database/sql Query()
+//Query() Encapsulation database/sql
 func (d Database) query(q string, args ...interface{}) (rows *sql.Rows) {
 	rows, err := d.db.Query(q, args...)
 	if err != nil {
@@ -43,6 +45,10 @@ func (d Database) query(q string, args ...interface{}) (rows *sql.Rows) {
 		return nil
 	}
 	return rows
+}
+
+func (d Database) queryrow(q string, args ...interface{}) (row *sql.Row) {
+	return d.db.QueryRow(q, args...)
 }
 
 func init() {
@@ -57,8 +63,9 @@ func Close() {
 	database.db.Close()
 }
 
-func TaskQuery(sql string, args ...interface{}) error {
-	SQL := database.prepare(sql)
+//TaskExec
+func TaskExec(q string, args ...interface{}) error {
+	SQL := database.prepare(q)
 	tx := database.begin()
 	_, err = tx.Stmt(SQL).Exec(args...)
 	if err != nil {
@@ -73,4 +80,12 @@ func TaskQuery(sql string, args ...interface{}) error {
 		log.Println("Commit successful")
 	}
 	return err
+}
+
+func TaskQueryRows(q string, args ...interface{}) (rows *sql.Rows) {
+	return database.query(q, args...)
+}
+
+func TaskQueryRow(q string, args ...interface{}) (row *sql.Row) {
+	return database.queryrow(q, args...)
 }
