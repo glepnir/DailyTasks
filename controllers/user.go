@@ -1,5 +1,5 @@
 // Package controller provides ...
-package controller
+package controllers
 
 import (
 	"log"

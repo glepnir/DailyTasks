@@ -6,12 +6,17 @@ import (
 	"net/http"
 
 	"github.com/taigacute/DailyTasks/routers"
+	"github.com/taigacute/DailyTasks/util/jsonconfig"
 	"github.com/taigacute/DailyTasks/view"
 )
 
 func main() {
+	values, err := jsonconfig.ReadConfig("./config/config.json")
+	if err != nil {
+		log.Println("Port is not allow")
+	}
 	view.RenderTemplate()
 	routers.InitRouter()
-	log.Print("Running on Port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Running on Port", values.ServerPort)
+	log.Fatal(http.ListenAndServe(values.ServerPort, nil))
 }

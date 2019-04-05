@@ -17,7 +17,7 @@ var (
 	SearchTemplate    *template.Template
 	templates         *template.Template
 	LoginTemplate     *template.Template
-	message           string
+	Message           string
 	err               error
 )
 

@@ -10,8 +10,12 @@ import (
 
 //InitRouter bind url with handler
 func InitRouter() {
+	//login logout signup
 	http.HandleFunc("/login/", LoginFunc)
-	http.HandleFunc("/loginout/", middleware.RequiresLogin(LoginOutFunc))
+	http.HandleFunc("/logout/", middleware.RequiresLogin(LoginOutFunc))
 	http.HandleFunc("/signup/", SignUpFunc)
 	http.Handle("/static/", http.FileServer(http.Dir("public")))
+
+	//these handlers fetch set of tasks
+	http.HandleFunc("/", middleware.RequiresLogin(ShowAllTasksFunc))
 }

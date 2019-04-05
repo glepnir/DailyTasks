@@ -54,3 +54,16 @@ func (user *User) ValidUser(uname, pwd string) bool {
 	}
 	return true
 }
+func GetUserID(uname string) (int, error) {
+	var userID int
+	userSQL := "select id from user where username = ? "
+	rows := database.TaskQueryRows(userSQL, uname)
+	defer rows.Close()
+	if rows.Next() {
+		err := rows.Scan(&userID)
+		if err != nil {
+			return -1, err
+		}
+	}
+	return userID, nil
+}
