@@ -2,11 +2,13 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/taigacute/DailyTasks/model"
+	"github.com/taigacute/DailyTasks/util/sessions"
 	"github.com/taigacute/DailyTasks/view"
 )
 
@@ -14,6 +16,7 @@ var user = model.User{}
 
 //LoginFunc implements the login functionality
 func LoginFunc(w http.ResponseWriter, r *http.Request) {
+	session, _ := sessions.Store.Get(r, "session")
 	switch r.Method {
 	case "GET":
 		view.LoginTemplate.Execute(w, nil)
@@ -24,6 +27,10 @@ func LoginFunc(w http.ResponseWriter, r *http.Request) {
 		// there will not handle the empty value it should be handle by javascript
 		if user.UserIsExist(username) {
 			if user.ValidUser(username, password) {
+				session.Values["loggedin"] = "true"
+				session.Values["username"] = username
+				session.Save(r, w)
+				log.Println("user", username, "is authenticated")
 				http.Redirect(w, r, "/", 302)
 			}
 			http.Error(w, "Wrong username or password", http.StatusInternalServerError)
@@ -32,6 +39,18 @@ func LoginFunc(w http.ResponseWriter, r *http.Request) {
 		}
 		view.LoginTemplate.Execute(w, nil)
 	}
+}
+
+// LoginOutFunc will remove session
+func LoginOutFunc(w http.ResponseWriter, r *http.Request) {
+	session, err := sessions.Store.Get(r, "session")
+	if err == nil {
+		if session.Values["loggedin"] != "false" {
+			session.Values["loggedin"] = "false"
+			session.Save(r, w)
+		}
+	}
+	http.Redirect(w, r, "/login/", 302)
 }
 
 // SignUpFunc will enable new users to sign up
@@ -56,7 +75,7 @@ func SignUpFunc(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Unable to sign user up", http.StatusInternalServerError)
 		} else {
-			http.Redirect(w, r, "/login", 302)
+			http.Redirect(w, r, "/login/", 302)
 		}
 	}
 }

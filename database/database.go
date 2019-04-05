@@ -63,7 +63,7 @@ func Close() {
 	database.db.Close()
 }
 
-//TaskExec
+//TaskExec ...will return error
 func TaskExec(q string, args ...interface{}) error {
 	SQL := database.prepare(q)
 	tx := database.begin()
@@ -82,6 +82,7 @@ func TaskExec(q string, args ...interface{}) error {
 	return err
 }
 
+//TaskQueryRows will return rows
 func TaskQueryRows(q string, args ...interface{}) (rows *sql.Rows) {
 	return database.query(q, args...)
 }

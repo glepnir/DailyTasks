@@ -20,7 +20,7 @@ func (user *User) RegisterUser(uname string, pwd string, email string) error {
 	return err
 }
 
-//IsExist will return true when user isExist in databse
+//UserIsExist will return true when user isExist in databse
 func (user *User) UserIsExist(uname string) bool {
 	var username string
 	sql := "select username from user where username = ?"
