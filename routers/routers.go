@@ -18,4 +18,5 @@ func InitRouter() {
 
 	//these handlers fetch set of tasks
 	http.HandleFunc("/", middleware.RequiresLogin(ShowAllTasksFunc))
+	http.HandleFunc("/add/", middleware.RequiresLogin(AddTaskFunc))
 }

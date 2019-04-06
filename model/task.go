@@ -38,7 +38,24 @@ var (
 	context     Context
 	getTaskSQL  string
 	rows        *sql.Rows
+	taskStatus  map[string]int
 )
+
+func (tk *Task) AddTask(title, content, category string, taskPriority int, username string, hidden int) error {
+	log.Println("AddTask : started function")
+	var err error
+	userID, err := GetUserID(username)
+	if err != nil && (title != "" || content != "") {
+		return err
+	}
+	if category == "" {
+		err = database.TaskExec("insert into task(title, content, priority, task_status_id, created_date, last_modified_at, user_id,hide) values(?,?,?,?,datetime(), datetime(),?,?)", title, content, taskPriority, taskStatus["PENDING"], userID, hidden)
+	} else {
+		categoryID := GetCategoryByName(username, category)
+		err = database.TaskExec("insert into task(title, content, priority, created_date, last_modified_at, cat_id, task_status_id, user_id,hide) values(?,?,?,datetime(), datetime(), ?,?,?,?)", title, content, taskPriority, categoryID, taskStatus["PENDING"], userID, hidden)
+	}
+	return err
+}
 
 //GetAllTasks will return all tasks context
 func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
@@ -100,4 +117,13 @@ func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
 		Navigation: status,
 	}
 	return context, nil
+}
+
+func AddFile(fileName, token, username string) error {
+	userID, err := GetUserID(username)
+	if err != nil {
+		return err
+	}
+	err = database.TaskExec("insert into files values(?,?,?,datetime())", fileName, token, userID)
+	return err
 }

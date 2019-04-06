@@ -46,3 +46,17 @@ func GetCategories(uname string) []CategoryCount {
 	}
 	return cateories
 }
+
+func GetCategoryByName(username, category string) int {
+	stmt := "select id from category where name=? and user_id = (select id from user where username=?)"
+	rows := database.TaskQueryRows(stmt, category, username)
+	var categoryID int
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&categoryID)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	return categoryID
+}
