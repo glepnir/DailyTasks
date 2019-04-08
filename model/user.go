@@ -54,6 +54,8 @@ func (user *User) ValidUser(uname, pwd string) bool {
 	}
 	return true
 }
+
+//GetUserID will return userid and error
 func GetUserID(uname string) (int, error) {
 	var userID int
 	userSQL := "select id from user where username = ? "

@@ -52,6 +52,7 @@ func ShowAllTasksFunc(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//AddTaskFunc Add task controller
 func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)

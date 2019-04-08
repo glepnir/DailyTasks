@@ -29,11 +29,13 @@ type Task struct {
 	CompletedMsg string        `json:"completedmsg,omitempty"`
 }
 
+//Tasks a slice Task
 type Tasks []Task
 
 var (
-	tasks       Tasks
-	task        Task
+	tasks Tasks
+	task  Task
+	//TaskCreated time
 	TaskCreated time.Time
 	context     Context
 	getTaskSQL  string
@@ -41,6 +43,7 @@ var (
 	taskStatus  map[string]int
 )
 
+//AddTask will add a new task
 func (tk *Task) AddTask(title, content, category string, taskPriority int, username string, hidden int) error {
 	log.Println("AddTask : started function")
 	var err error
@@ -119,6 +122,7 @@ func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
 	return context, nil
 }
 
+//AddFile will return a error
 func AddFile(fileName, token, username string) error {
 	userID, err := GetUserID(username)
 	if err != nil {

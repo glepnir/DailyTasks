@@ -47,6 +47,7 @@ func GetCategories(uname string) []CategoryCount {
 	return cateories
 }
 
+//GetCategoryByName will return categoryID
 func GetCategoryByName(username, category string) int {
 	stmt := "select id from category where name=? and user_id = (select id from user where username=?)"
 	rows := database.TaskQueryRows(stmt, category, username)

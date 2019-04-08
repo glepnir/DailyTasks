@@ -1,0 +1,41 @@
+{{template "_head.html" .}}
+<div class="timeline">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title" id="newNoteLabel"><span class="glyphicon glyphicon-pencil"></span> 编辑任务 </h4>
+        </div>
+        {{ $categories := .Categories }} {{$referer := .Referer}} {{range $index, $task := .Tasks}}
+        <div class="modal-body">
+            <form action="/update/" method="POST">
+                <div class="form-group">
+                    <input type="text" name="title" value="{{ $task.Title}}" class="form-control" id="add-note-title" placeholder="Title">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" name="content" id="add-note-content" placeholder="Content" rows="10" >{{ $task.Content}}</textarea>
+
+                    <input type="text" name="id" value="{{.Id}}" class="hidden" /> 任务:
+                    <input type="radio" name="priority" value="3" {{if eq .Priority "3"}} checked="checked" {{end}} /> 高
+                    <input type="radio" name="priority" value="2" {{if eq .Priority "2"}} checked="checked" {{end}} /> 中
+                    <input type="radio" name="priority" value="1" {{if eq .Priority "1"}} checked="checked" {{end}} /> 低
+                </div>
+                <input type="checkbox" name="hide" id="hideChk"> 在时间线上隐藏<br>
+                分类:
+                <select name="category">
+                    <option>---</option>
+                    {{range $index, $cat := $categories}}
+                    <option value="{{$cat.Name}}" {{if eq $cat.Name $task.Category}} selected="true" {{end}}> {{$cat.Name}} </option>
+                    {{end}}
+                </select>
+        </div>
+        <div class="modal-footer">
+            <a href="{{$referer}}" ><button type="button" class="btn btn-default" data-dismiss="modal">关闭</button></a>
+            <input type="submit" value="Submit" class="btn btn-default" />
+        </div>
+        </form>
+    </div>
+</div>
+{{end}} {{template "_footer.html"}}
+
+</body>
+
+</html>

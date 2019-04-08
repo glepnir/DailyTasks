@@ -21,11 +21,17 @@ var (
 	err               error
 )
 
-//RenderTemplate
-func RenderTemplate() {
+//RenderTemplate  will populate tempalte
+func RenderTemplate(tpl string) {
 	var templateFiles []string
-	templteDir := "./templates/"
-	files, err := ioutil.ReadDir(templteDir)
+	var templateDir string
+	switch tpl {
+	case "English":
+		templateDir = "./templates/"
+	case "Chinese":
+		templateDir = "./templatescn/"
+	}
+	files, err := ioutil.ReadDir(templateDir)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -33,7 +39,7 @@ func RenderTemplate() {
 	for _, file := range files {
 		filename := file.Name()
 		if strings.HasSuffix(filename, ".html") {
-			templateFiles = append(templateFiles, templteDir+filename)
+			templateFiles = append(templateFiles, templateDir+filename)
 		}
 	}
 	templates, err = template.ParseFiles(templateFiles...)
