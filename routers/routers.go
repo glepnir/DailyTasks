@@ -19,4 +19,10 @@ func InitRouter() {
 	//these handlers fetch set of tasks
 	http.HandleFunc("/", middleware.RequiresLogin(ShowAllTasksFunc))
 	http.HandleFunc("/add/", middleware.RequiresLogin(AddTaskFunc))
+	http.HandleFunc("/add-category/", middleware.RequiresLogin(AddCategoryFunc))
+	http.HandleFunc("/add-comment/", middleware.RequiresLogin(AddCommentFunc))
+
+	http.HandleFunc("/del-comment/", middleware.RequiresLogin(DeleteCommentFunc))
+	http.HandleFunc("/del-category/", middleware.RequiresLogin(DeleteCategoryFunc))
+	http.HandleFunc("/delete/", middleware.RequiresLogin(DeleteTaskFunc))
 }

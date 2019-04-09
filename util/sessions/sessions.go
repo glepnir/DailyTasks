@@ -4,6 +4,8 @@ package sessions
 import (
 	"net/http"
 
+	"log"
+
 	"github.com/gorilla/sessions"
 )
 
@@ -13,7 +15,10 @@ var Store = sessions.NewCookieStore([]byte("tasks-g0lang"))
 //IsLoggedIn will check if the user has an active sesion and return true
 func IsLoggedIn(r *http.Request) bool {
 	session, err := Store.Get(r, "session")
-	if err == nil && (session.Values["loggedin"] == true) {
+	if err != nil {
+		log.Println(err)
+	}
+	if session.Values["loggedin"] == "true" {
 		return true
 	}
 	return false

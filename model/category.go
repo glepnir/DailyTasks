@@ -25,6 +25,16 @@ type Category struct {
 //Categories will show
 type Categories []Category
 
+func AddCategory(username, category string) error {
+	userID, err := GetUserID(username)
+	if err != nil {
+		return nil
+	}
+	log.Println("executing query to add category")
+	err = database.TaskExec("insert into category(name, user_id) values(?,?)", category, userID)
+	return err
+}
+
 //GetCategories will return the list of cateories
 //render in the template
 func GetCategories(uname string) []CategoryCount {
@@ -60,4 +70,22 @@ func GetCategoryByName(username, category string) int {
 		}
 	}
 	return categoryID
+}
+
+//DeleteCategoryByName will be used to delete a category from the category page
+func DeleteCategoryByName(username, category string) error {
+	categoryID := GetCategoryByName(username, category)
+	userID, err := GetUserID(username)
+	if err != nil {
+		return err
+	}
+	query := "update task set cat_id = null where id =? and user_id = ?"
+	err = database.TaskExec(query, categoryID, userID)
+	if err == nil {
+		err = database.TaskExec("delete from category where id=? and user_id=?", categoryID, userID)
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }

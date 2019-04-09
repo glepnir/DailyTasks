@@ -32,12 +32,14 @@ func LoginFunc(w http.ResponseWriter, r *http.Request) {
 				session.Save(r, w)
 				log.Println("user", username, "is authenticated")
 				http.Redirect(w, r, "/", 302)
+			} else {
+				http.Error(w, "Wrong username or password", http.StatusInternalServerError)
 			}
-			http.Error(w, "Wrong username or password", http.StatusInternalServerError)
 		} else {
 			http.Error(w, "User doesnt exist", http.StatusInternalServerError)
 		}
-		view.LoginTemplate.Execute(w, nil)
+	default:
+		http.Redirect(w, r, "/login/", http.StatusUnauthorized)
 	}
 }
 

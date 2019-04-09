@@ -131,3 +131,15 @@ func AddFile(fileName, token, username string) error {
 	err = database.TaskExec("insert into files values(?,?,?,datetime())", fileName, token, userID)
 	return err
 }
+
+//DeleteAll is used to empty the trash
+func DeleteAll(username string) error {
+	err := database.TaskExec("delete from task where task_status_id=? where user_id=(select id from user where username=?)", taskStatus["DELETED"], username)
+	return err
+}
+
+// DeleteTask is used to delete the task from databse
+func DeleteTask(username string, id int) error {
+	err := database.TaskExec("delete from task where id = ? and user_id=(select id from user where username=?)", id, username)
+	return err
+}

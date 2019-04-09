@@ -133,3 +133,35 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
 	}
 }
+
+//DeleteTaskFunc is used to delete a task, trash = move to recycle bin, delete = permanent delete
+func DeleteTaskFunc(w http.ResponseWriter, r *http.Request) {
+	username := sessions.GetCurrentUserName(r)
+	if r.Method != "GET" {
+		http.Redirect(w, r, "/", http.StatusBadRequest)
+		return
+	}
+	id := r.URL.Path[len("/delete/"):]
+	if id == "all" {
+		err := model.DeleteAll(username)
+		if err != nil {
+			view.Message = "Error delete tasks"
+			http.Redirect(w, r, "/", http.StatusInternalServerError)
+		}
+		http.Redirect(w, r, "/", http.StatusFound)
+	} else {
+		id, err := strconv.Atoi(id)
+		if err != nil {
+			log.Println(err)
+			http.Redirect(w, r, "/", http.StatusBadRequest)
+		} else {
+			err = model.DeleteTask(username, id)
+			if err != nil {
+				view.Message = "Error deleting task"
+			} else {
+				view.Message = "Task deleted"
+			}
+			http.Redirect(w, r, "/deleted", http.StatusFound)
+		}
+	}
+}

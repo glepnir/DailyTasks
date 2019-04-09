@@ -11,7 +11,7 @@ import (
 // htppHandlerFunc to check if there is any active session
 func RequiresLogin(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if sessions.IsLoggedIn(r) {
+		if !sessions.IsLoggedIn(r) {
 			http.Redirect(w, r, "/login", 302)
 			return
 		}

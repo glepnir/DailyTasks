@@ -4,6 +4,8 @@ package model
 import (
 	"time"
 
+	"log"
+
 	"github.com/taigacute/DailyTasks/database"
 )
 
@@ -13,6 +15,21 @@ type Comment struct {
 	Content  string `json:"content"`
 	Created  string `json:"created_date"`
 	Username string `json:"username"`
+}
+
+//AddComment  will add comment
+func AddComment(username string, id int, comment string) error {
+	userID, err := GetUserID(username)
+	if err != nil {
+		return err
+	}
+	stmt := "insert into comments(taskID, content, created, user_id) values (?,?,datetime(),?)"
+	err = database.TaskExec(stmt, id, comment, userID)
+	if err != nil {
+		return err
+	}
+	log.Println("add comment to task ID", id)
+	return nil
 }
 
 //GetComments will return a map and error which key is int value is slice of comment
@@ -38,4 +55,15 @@ func GetComments(username string) (map[int][]Comment, error) {
 		commentMap[taskID] = append(commentMap[taskID], comment)
 	}
 	return commentMap, nil
+}
+
+//DeleteCommentByID will actually delete the comment from db
+func DeleteCommentByID(username string, id int) error {
+	userID, err := GetUserID(username)
+	if err != nil {
+		return err
+	}
+	query := "delete from comments where id=? and user_id=?"
+	err = database.TaskExec(query, id, userID)
+	return err
 }
