@@ -18,7 +18,7 @@ type Task struct {
 	Id           int           `json:"id"`
 	Title        string        `json:"title"`
 	Content      string        `json:"content"`
-	ContentHtml  template.HTML `json:"content_html"`
+	ContentHTML  template.HTML `json:"content_html"`
 	Created      string        `json:"created"`
 	Priority     string        `json:"priority"`
 	Category     string        `json:"category"`
@@ -33,19 +33,12 @@ type Task struct {
 type Tasks []Task
 
 var (
-	tasks Tasks
-	task  Task
-	//TaskCreated time
-	TaskCreated time.Time
-	context     Context
-	getTaskSQL  string
-	rows        *sql.Rows
-	taskStatus  map[string]int
+	taskStatus map[string]int
 )
 
 //AddTask will add a new task
 func (tk *Task) AddTask(title, content, category string, taskPriority int, username string, hidden int) error {
-	log.Println("AddTask : started function")
+	log.Println("AddTask: started function")
 	var err error
 	userID, err := GetUserID(username)
 	if err != nil && (title != "" || content != "") {
@@ -61,9 +54,15 @@ func (tk *Task) AddTask(title, content, category string, taskPriority int, usern
 }
 
 //GetAllTasks will return all tasks context
-func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
-	log.Println("get task for ", status)
-	comments, err := GetComments(uname)
+func (tk *Task) GetAllTasks(username, status, category string) (Context, error) {
+	log.Println("getting tasks for ", status)
+	var tasks []Task
+	var task Task
+	var TaskCreated time.Time
+	var context Context
+	var getTaskSQL string
+	var rows *sql.Rows
+	comments, err := GetComments(username)
 	if err != nil {
 		return context, err
 	}
@@ -71,22 +70,22 @@ func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
 	if category == "" {
 		switch status {
 		case "pending":
-			getTaskSQL = basicSQL + "and s.status = 'PENDING' and t.hide !=1"
+			getTaskSQL = basicSQL + " and s.status='PENDING' and t.hide!=1"
 		case "deleted":
-			getTaskSQL = basicSQL + "and s.status = 'DELETED' and t.hide !=1"
+			getTaskSQL = basicSQL + " and s.status='DELETED' and t.hide!=1"
 		case "completed":
-			getTaskSQL = basicSQL + "and s.status = 'COMPLETE'and t.hide !=1"
+			getTaskSQL = basicSQL + " and s.status='COMPLETE' and t.hide!=1"
 		}
 		getTaskSQL += " order by t.created_date asc"
-		rows = database.TaskQueryRows(getTaskSQL, uname, uname)
+		rows = database.TaskQueryRows(getTaskSQL, username, username)
 	} else {
 		status = category
 		if category == "UNCATEGORIZED" {
 			getTaskSQL = "select t.id, title, content, created_date, priority, 'UNCATEGORIZED' from task t, status s, user u where u.username=? and s.id=t.task_status_id and u.id=t.user_id and t.cat_id=0  and  s.status='PENDING'  order by priority desc, created_date asc, finish_date asc"
-			rows = database.TaskQueryRows(getTaskSQL, uname)
+			rows = database.TaskQueryRows(getTaskSQL, username)
 		} else {
 			getTaskSQL = basicSQL + " and name = ?  and  s.status='PENDING'  order by priority desc, created_date asc, finish_date asc"
-			rows = database.TaskQueryRows(getTaskSQL, uname, category)
+			rows = database.TaskQueryRows(getTaskSQL, username, category)
 		}
 	}
 	defer rows.Close()
@@ -102,9 +101,10 @@ func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
 				}
 				totalTasks += 1
 			}
-			task.CompletedMsg = strconv.Itoa(taskCompleted) + "complete out of" + strconv.Itoa(totalTasks)
+			task.CompletedMsg = strconv.Itoa(taskCompleted) + " complete out of " + strconv.Itoa(totalTasks)
 		}
-		task.ContentHtml = template.HTML(md.Markdown([]byte(task.Content)))
+		task.ContentHTML = template.HTML(md.Markdown([]byte(task.Content)))
+		// TaskContent = strings.Replace(TaskContent, "\n", "<br>", -1)
 		if err != nil {
 			log.Println(err)
 		}
@@ -115,10 +115,28 @@ func (tk *Task) GetAllTasks(uname, status, category string) (Context, error) {
 		task.Created = TaskCreated.Format("Jan 2 2006")
 		tasks = append(tasks, task)
 	}
-	context = Context{
-		Tasks:      tasks,
-		Navigation: status,
+	context = Context{Tasks: tasks, Navigation: status}
+	return context, nil
+}
+
+//GetTaskByID function gets the tasks from the ID passed to the function, used to populate EditTask
+func GetTaskByID(username string, id int) (Context, error) {
+	var tasks []Task
+	var task Task
+
+	getTaskSQL := "select t.id, t.title, t.content, t.priority, t.hide, c.name from task t join user u left outer join category c where c.id = t.cat_id and t.user_id=u.id and t.id=? and u.username=? union select t.id, t.title, t.content, t.priority, t.hide, 'UNCATEGORIZED' from task t join user u where t.user_id=u.id and t.cat_id=0 and t.id=? and u.username=?;"
+
+	rows := database.TaskQueryRows(getTaskSQL, id, username, id, username)
+	defer rows.Close()
+	if rows.Next() {
+		err := rows.Scan(&task.Id, &task.Title, &task.Content, &task.Priority, &task.IsHidden, &task.Category)
+		if err != nil {
+			log.Println(err)
+			//send email to respective people
+		}
 	}
+	tasks = append(tasks, task)
+	context := Context{Tasks: tasks, Navigation: "edit"}
 	return context, nil
 }
 

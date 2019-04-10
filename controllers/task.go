@@ -28,6 +28,7 @@ var (
 func ShowAllTasksFunc(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		username := sessions.GetCurrentUserName(r)
+		log.Println(username)
 		context, err := tk.GetAllTasks(username, "pending", "")
 		log.Println(context)
 		categories := model.GetCategories(username)
@@ -54,14 +55,16 @@ func ShowAllTasksFunc(w http.ResponseWriter, r *http.Request) {
 
 //AddTaskFunc Add task controller
 func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method != "POST" { // Will work only for POST requests, will redirect to home
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
 	}
-	var filelink string
+
+	var filelink string // will store the html when we have files to be uploaded, appened to the note content
 	r.ParseForm()
 	file, handler, err := r.FormFile("uploadfile")
 	if err != nil && handler != nil {
+		//Case executed when file is uploaded and yet an error occurs
 		log.Println(err)
 		view.Message = "Error uploading file"
 		http.Redirect(w, r, "/", http.StatusInternalServerError)
@@ -96,9 +99,9 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 	if formToken == cookie.Value {
 		username := sessions.GetCurrentUserName(r)
 		if handler != nil {
-			r.ParseMultipartForm(32 << 20)
+			r.ParseMultipartForm(32 << 20) //defined maximum size of file
 			defer file.Close()
-			htmlFilename := strings.Replace(handler.Filename, "", "-", -1)
+			htmlFilename := strings.Replace(handler.Filename, " ", "-", -1)
 			randomFileName := md5.New()
 			io.WriteString(randomFileName, strconv.FormatInt(time.Now().Unix(), 10))
 			io.WriteString(randomFileName, htmlFilename)
@@ -109,7 +112,8 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			defer f.Close()
-			if strings.HasSuffix(htmlFilename, ".png") || strings.HasSuffix(htmlFilename, ".jgp") {
+			io.Copy(f, file)
+			if strings.HasSuffix(htmlFilename, ".png") || strings.HasSuffix(htmlFilename, ".jpg") {
 				filelink = "<br> <img src='/files/" + htmlFilename + "'/>"
 			} else {
 				filelink = "<br> <a href=/files/" + htmlFilename + ">" + htmlFilename + "</a>"
@@ -117,14 +121,18 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 			content = content + filelink
 			fileTruth := model.AddFile(htmlFilename, token, username)
 			if fileTruth != nil {
-				view.Message = "Error add filename in db"
-				log.Println("Error add filename in db")
+				view.Message = "Error adding filename in db"
+				log.Println("error adding task to db")
 			}
 		}
 		taskTruth := tk.AddTask(title, content, category, taskPriority, username, hidden)
 		if taskTruth != nil {
 			view.Message = "Error adding task"
-			log.Println("error adding task")
+			log.Println("error adding task to db")
+			http.Redirect(w, r, "/", http.StatusInternalServerError)
+		} else {
+			view.Message = "Task added"
+			log.Println("added task to db")
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
 	} else {
