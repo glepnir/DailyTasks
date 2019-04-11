@@ -82,10 +82,12 @@ func (tk *Task) GetAllTasks(username, status, category string) (Context, error) 
 		status = category
 		if category == "UNCATEGORIZED" {
 			getTaskSQL = "select t.id, title, content, created_date, priority, 'UNCATEGORIZED' from task t, status s, user u where u.username=? and s.id=t.task_status_id and u.id=t.user_id and t.cat_id=0  and  s.status='PENDING'  order by priority desc, created_date asc, finish_date asc"
-			rows = database.TaskQueryRows(getTaskSQL, username)
+			//rows = database.TaskQueryRows(getTaskSQL, username)
+			rows = database.Query(getTaskSQL, username)
 		} else {
 			getTaskSQL = basicSQL + " and name = ?  and  s.status='PENDING'  order by priority desc, created_date asc, finish_date asc"
-			rows = database.TaskQueryRows(getTaskSQL, username, category)
+			//rows = database.TaskQueryRows(getTaskSQL, username, category)
+			rows = database.Query(getTaskSQL, username, category)
 		}
 	}
 	defer rows.Close()

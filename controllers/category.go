@@ -9,7 +9,6 @@ import (
 	"github.com/taigacute/DailyTasks/model"
 	"github.com/taigacute/DailyTasks/util/sessions"
 	"github.com/taigacute/DailyTasks/view"
-	"github.com/thewhitetulip/Tasks/db"
 )
 
 //AddCategoryFunc  will add category
@@ -43,7 +42,7 @@ func DeleteCategoryFunc(w http.ResponseWriter, r *http.Request) {
 
 	categoryName := r.URL.Path[len("/del-category/"):]
 	username := sessions.GetCurrentUserName(r)
-	err := db.DeleteCategoryByName(username, categoryName)
+	err := model.DeleteCategoryByName(username, categoryName)
 	if err != nil {
 		view.Message = "error deleting category"
 	} else {

@@ -90,3 +90,11 @@ func TaskQueryRows(q string, args ...interface{}) (rows *sql.Rows) {
 func TaskQueryRow(q string, args ...interface{}) (row *sql.Row) {
 	return database.queryrow(q, args...)
 }
+
+func Query(q string, args ...interface{}) (rows *sql.Rows) {
+	rows, err := database.db.Query(q, args...)
+	if err != nil {
+		log.Println(err)
+	}
+	return rows
+}

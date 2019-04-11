@@ -28,7 +28,6 @@ var (
 func ShowAllTasksFunc(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		username := sessions.GetCurrentUserName(r)
-		log.Println(username)
 		context, err := tk.GetAllTasks(username, "pending", "")
 		log.Println(context)
 		categories := model.GetCategories(username)
