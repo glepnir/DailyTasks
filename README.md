@@ -8,7 +8,7 @@ This App can help people use standard library build a web app who is golang begi
 # How to Use
 - `go get github.com/taigacute/DailyTasks`
 - `cd $GOPATH/src/github.com/taigacute/DailyTasks`
-- `sh ./install.sh`
+- `sh install.sh`
 
 # Project
 
