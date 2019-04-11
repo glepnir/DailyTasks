@@ -39,6 +39,7 @@ var (
 //AddTask will add a new task
 func (tk *Task) AddTask(title, content, category string, taskPriority int, username string, hidden int) error {
 	log.Println("AddTask: started function")
+	taskStatus = map[string]int{"COMPLETE": 1, "PENDING": 2, "DELETED": 3}
 	var err error
 	userID, err := GetUserID(username)
 	if err != nil && (title != "" || content != "") {
@@ -53,9 +54,20 @@ func (tk *Task) AddTask(title, content, category string, taskPriority int, usern
 	return err
 }
 
+// UpdateTask will update the task
+func (tk *Task) UpdateTask(id int, title, content, category string, priority int, username string, hide int) error {
+	categoryID := GetCategoryIDByName(username, category)
+	userID, err := GetUserID(username)
+	if err != nil {
+		return err
+	}
+	err = database.TaskExec("update task set title=?, content=?, cat_id=?, priority = ? where id=? and user_id=?", title, content, categoryID, priority, id, userID)
+	return err
+}
+
 //GetAllTasks will return all tasks context
 func (tk *Task) GetAllTasks(username, status, category string) (Context, error) {
-	log.Println("getting tasks for ", status)
+	log.Println("getting tasks for ", username, status, category)
 	var tasks []Task
 	var task Task
 	var TaskCreated time.Time
@@ -90,18 +102,20 @@ func (tk *Task) GetAllTasks(username, status, category string) (Context, error) 
 			rows = database.Query(getTaskSQL, username, category)
 		}
 	}
+	log.Println(getTaskSQL)
 	defer rows.Close()
 	for rows.Next() {
 		task = Task{}
 		err = rows.Scan(&task.Id, &task.Title, &task.Content, &TaskCreated, &task.Priority, &task.Category)
+		log.Println("get task value", task)
 		taskCompleted := 0
 		totalTasks := 0
 		if strings.HasPrefix(task.Content, "- [") {
 			for _, value := range strings.Split(task.Content, "\n") {
 				if strings.HasPrefix(value, "- [x]") {
-					taskCompleted += 1
+					taskCompleted++
 				}
-				totalTasks += 1
+				totalTasks++
 			}
 			task.CompletedMsg = strconv.Itoa(taskCompleted) + " complete out of " + strconv.Itoa(totalTasks)
 		}
@@ -116,6 +130,7 @@ func (tk *Task) GetAllTasks(username, status, category string) (Context, error) 
 		TaskCreated = TaskCreated.Local()
 		task.Created = TaskCreated.Format("Jan 2 2006")
 		tasks = append(tasks, task)
+		log.Println("get tasks", tasks)
 	}
 	context = Context{Tasks: tasks, Navigation: status}
 	return context, nil
@@ -162,4 +177,69 @@ func DeleteAll(username string) error {
 func DeleteTask(username string, id int) error {
 	err := database.TaskExec("delete from task where id = ? and user_id=(select id from user where username=?)", id, username)
 	return err
+}
+
+//RestoreTask is used to restore tasks from the Trash
+func (tk *Task) RestoreTask(username string, id int) error {
+	err := database.TaskExec("update task set task_status_id=?,last_modified_at=datetime(),finish_date=null where id=? and user_id=(select id from user where username=?)", taskStatus["PENDING"], id, username)
+	return err
+}
+
+//RestoreTaskFromComplete is used to restore tasks from the Trash
+func (tk *Task) RestoreTaskFromComplete(username string, id int) error {
+	err := database.TaskExec("update task set finish_date=null,last_modified_at=datetime(), task_status_id=? where id=? and user_id=(select id from user where username=?)", taskStatus["PENDING"], id, username)
+	return err
+}
+
+//CompleteTask  is used to mark tasks as complete
+func (tk *Task) CompleteTask(username string, id int) error {
+	err := database.TaskExec("update task set task_status_id=?, finish_date=datetime(),last_modified_at=datetime() where id=? and user_id=(select id from user where username=?) ", taskStatus["COMPLETE"], id, username)
+	return err
+}
+
+//TrashTask is used to delete the task
+func (tk *Task) TrashTask(username string, id int) error {
+	err := database.TaskExec("update task set task_status_id=?,last_modified_at=datetime() where user_id=(select id from user where username=?) and id=?", taskStatus["DELETED"], username, id)
+	return err
+}
+
+//SearchTask is used to return the search results depending on the query
+func SearchTask(username, query string) (Context, error) {
+	var tasks []Task
+	var task Task
+	var TaskCreated time.Time
+	var context Context
+	comments, err := GetComments(username)
+	if err != nil {
+		log.Println("SearchTask: something went wrong in finding comments")
+	}
+	userID, err := GetUserID(username)
+	if err != nil {
+		return context, err
+	}
+	stmt := "select t.id, title, content, created_date, priority, c.name from task t, category c where t.user_id=? and c.id = t.cat_id and (title like '%" + query + "%' or content like '%" + query + "%') order by created_date desc"
+	rows := database.TaskQueryRows(stmt, userID, query, query)
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&task.Id, &task.Title, &task.Content, &TaskCreated, &task.Priority, &task.Category)
+		if err != nil {
+			log.Println(err)
+		}
+		if comments[task.Id] != nil {
+			task.Comments = comments[task.Id]
+		}
+		task.Title = strings.Replace(task.Title, query, "<span class='highlight'>"+query+"</span>", -1)
+		task.Content = strings.Replace(task.Content, query, "<span class='highlight'>"+query+"</span>", -1)
+		task.Content = string(md.Markdown([]byte(task.Content)))
+		TaskCreated = TaskCreated.Local()
+		CurrentTime := time.Now().Local()
+		week := TaskCreated.AddDate(0, 0, 7)
+		if (week.String() < CurrentTime.String()) && (task.Priority != "1") {
+			task.IsOverdue = true // If one week then overdue by default
+		}
+		task.Created = TaskCreated.Format("Jan 2 2006")
+		tasks = append(tasks, task)
+	}
+	context = Context{Tasks: tasks, Search: query, Navigation: "search"}
+	return context, nil
 }

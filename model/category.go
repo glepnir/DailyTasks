@@ -72,6 +72,31 @@ func GetCategoryByName(username, category string) int {
 	return categoryID
 }
 
+func GetCategoryIDByName(username, category string) int {
+	var categoryID int
+	getTaskSQL := "select c.id from category c , user u where u.id = c.user_id and name=? and u.username=?"
+	rows := database.TaskQueryRows(getTaskSQL, category, username)
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&categoryID)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	return categoryID
+}
+
+func UpdateCategoryByName(username, oldName, newName string) error {
+	userID, err := GetUserID(username)
+	if err != nil {
+		return err
+	}
+	query := "update category set name = ? where name=? and user_id=?"
+	log.Println(query)
+	err = database.TaskExec(query, newName, oldName, userID)
+	return err
+}
+
 //DeleteCategoryByName will be used to delete a category from the category page
 func DeleteCategoryByName(username, category string) error {
 	categoryID := GetCategoryByName(username, category)

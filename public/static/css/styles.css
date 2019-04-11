@@ -9,7 +9,6 @@ Notes:	 omninotesweb
 
 */
 
-
 /*--------------------------------------
 Layout
 -------------------------------------- */
@@ -29,8 +28,9 @@ Layout
   border-radius: 4px;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
+  -webkit-transition: border-color ease-in-out 0.15s,
+    box-shadow ease-in-out 0.15s;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 
 .comment {
@@ -86,9 +86,9 @@ ul {
   right: 10px;
   max-width: 400px;
   padding: 12px;
-  background-color: #F2FCFF;
+  background-color: #f2fcff;
   box-shadow: 1px 0px 9px 0px rgba(27, 123, 216, 0.4);
-  border: 1px solid #5596CE;
+  border: 1px solid #5596ce;
   border-radius: 10px;
   border-radius: 10px;
   z-index: 1100;
@@ -103,7 +103,6 @@ ul {
   text-align: center;
   float: right;
 }
-
 
 /*--------------------------------------
 Navbar
@@ -153,7 +152,6 @@ nav .glyphicon:hover {
 .hidden {
   display: none;
 }
-
 
 /*--------------------------------------
 NotesFeed
@@ -208,7 +206,6 @@ hr {
   height: 20px;
 }
 
-
 /* These are the classes that are going to be applied: */
 
 .column {
@@ -221,7 +218,7 @@ hr {
   margin-bottom: 6px;
   padding: 15px;
   background-color: white;
-  box-shadow: 1px 1px 2px 1px #7D7470;
+  box-shadow: 1px 1px 2px 1px #7d7470;
   border-radius: 4px 4px 4px 4px;
   height: auto;
 }
@@ -241,7 +238,6 @@ hr {
   padding: 5px;
   height: 15px;
 }
-
 
 /*--------------------------------------
 Navigation drawer
@@ -282,11 +278,10 @@ body {
 }
 
 .badge {
-  background-color: #7D8EF0;
+  background-color: #7d8ef0;
   margin-right: 10px;
   float: right;
 }
-
 
 /* --------------------------------------
 Global Styles
@@ -301,14 +296,12 @@ body {
 }
 
 .highlight {
-  background-color: #72CBFF;
+  background-color: #72cbff;
 }
-
 
 /* --------------------------------------
 Media Queries
 -------------------------------------- */
-
 
 /* Portrait & landscape phone */
 
@@ -319,7 +312,7 @@ Media Queries
 
   textarea {
     resize: vertical;
-    width:50%;
+    width: 50%;
   }
 
   .timeline {
@@ -339,13 +332,13 @@ Media Queries
     padding: 0px;
     text-align: center;
   }
-  
+
   .btn-primary {
     width: auto;
   }
 
   .input {
-    width:100px;
+    width: 100px;
   }
 
   .floating-action-icon {
@@ -365,10 +358,9 @@ Media Queries
   }
 }
 
-
 /* Landscape phone to portrait tablet */
 
-@media (max-width: 768px) and (min-width:481px) {
+@media (max-width: 768px) and (min-width: 481px) {
   #icons {
     text-align: center;
     padding: 0;
@@ -405,10 +397,9 @@ Media Queries
   }
 }
 
-
 /* Large desktop */
 
-@media (max-width: 1400px) and (min-width:769px) {
+@media (max-width: 1400px) and (min-width: 769px) {
   .timeline {
     overflow: hidden;
     width: 55%;
@@ -416,11 +407,10 @@ Media Queries
   }
 
   textarea {
-      resize: vertical;
-      width: 400px;
+    resize: vertical;
+    width: 400px;
   }
 }
-
 
 /*--------------------------------------
 Sidebar
@@ -434,7 +424,6 @@ Sidebar
 .sidebar-wrapper.sidebar-default.sidebar-dragging {
   width: 260px;
 }
-
 
 /*Modal dialog*/
 

@@ -43,7 +43,6 @@ func DeleteCommentFunc(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
 	}
-
 	id := r.URL.Path[len("/del-comment/"):]
 	commentID, err := strconv.Atoi(id)
 	if err != nil {
@@ -51,15 +50,11 @@ func DeleteCommentFunc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	username := sessions.GetCurrentUserName(r)
-
 	err = model.DeleteCommentByID(username, commentID)
-
 	if err != nil {
 		view.Message = "comment not deleted"
 	} else {
 		view.Message = "comment deleted"
 	}
-
 	http.Redirect(w, r, "/", http.StatusFound)
-
 }
