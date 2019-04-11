@@ -14,3 +14,4 @@ This App can help people use standard library build a web app who is golang begi
 ![](https://github.com/taigacute/IMG/blob/master/DailyTasks/task.gif)
 # TODO
 - [x] Add Personal avatar
+- [x] jwt with rsa 
