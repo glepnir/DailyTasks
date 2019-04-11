@@ -102,12 +102,10 @@ func (tk *Task) GetAllTasks(username, status, category string) (Context, error) 
 			rows = database.Query(getTaskSQL, username, category)
 		}
 	}
-	log.Println(getTaskSQL)
 	defer rows.Close()
 	for rows.Next() {
 		task = Task{}
 		err = rows.Scan(&task.Id, &task.Title, &task.Content, &TaskCreated, &task.Priority, &task.Category)
-		log.Println("get task value", task)
 		taskCompleted := 0
 		totalTasks := 0
 		if strings.HasPrefix(task.Content, "- [") {
@@ -130,7 +128,6 @@ func (tk *Task) GetAllTasks(username, status, category string) (Context, error) 
 		TaskCreated = TaskCreated.Local()
 		task.Created = TaskCreated.Format("Jan 2 2006")
 		tasks = append(tasks, task)
-		log.Println("get tasks", tasks)
 	}
 	context = Context{Tasks: tasks, Navigation: status}
 	return context, nil
