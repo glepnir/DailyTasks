@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/taigacute/DailyTasks/model"
@@ -98,7 +99,8 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("csrftoken")
 	if formToken == cookie.Value {
 		username := sessions.GetCurrentUserName(r)
-		if handler != nil {
+
+		if handler.Filename != "" {
 			r.ParseMultipartForm(32 << 20) //defined maximum size of file
 			defer file.Close()
 			htmlFilename := strings.Replace(handler.Filename, " ", "-", -1)
@@ -106,7 +108,12 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 			io.WriteString(randomFileName, strconv.FormatInt(time.Now().Unix(), 10))
 			io.WriteString(randomFileName, htmlFilename)
 			token := fmt.Sprintf("%x", randomFileName.Sum(nil))
-			f, err := os.OpenFile("./files/"+htmlFilename, os.O_WRONLY|os.O_CREATE, 0666)
+			filesDirPath := filepath.Join(".", "files")
+			if err := os.MkdirAll(filesDirPath, os.ModeDir|os.ModePerm); err != nil {
+				log.Println(err)
+				return
+			}
+			f, err := os.OpenFile(filepath.Join(filesDirPath, htmlFilename), os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
 				log.Println(err)
 				return
