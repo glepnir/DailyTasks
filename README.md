@@ -10,8 +10,6 @@ This App can help people use standard library build a web app who is golang begi
 - `cd $GOPATH/src/github.com/taigacute/DailyTasks`
 - `sh install.sh`
 
-# Project
-![](https://github.com/taigacute/IMG/blob/master/DailyTasks/task.gif)
 # TODO
 - [ ] Add Personal avatar
 - [ ] jwt with rsa 
